@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  CLIENTE_DB: cliente_db
+  ESTOQUE_DB: estoque_db
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  KAFKA_HOST: kafka:9092

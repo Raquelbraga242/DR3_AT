@@ -1,0 +1,6 @@
+server:
+  port: 8081
+
+services:
+  cliente: http://localhost:8082
+  estoque: http://localhost:8080
