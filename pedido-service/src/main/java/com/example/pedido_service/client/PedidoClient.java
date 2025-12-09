@@ -61,11 +61,11 @@ public class PedidoClient {
                 .bodyToMono(Void.class)
                 .onErrorResume(e -> Mono.empty());
     }
-    private static record ProdutoResponse(String produtoId, String nome, int quantidade) {
+    public static record ProdutoResponse(String produtoId, String nome, int quantidade) {
         public int quantidade() { return quantidade; }
     }
 
-    private static class PedidoResumo {
+    public static class PedidoResumo {
         public String pedidoId;
         public String produto;
         public int quantidade;
