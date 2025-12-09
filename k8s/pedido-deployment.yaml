@@ -14,12 +14,10 @@ spec:
     spec:
       containers:
         - name: pedido-service
-          image: pedido-service:latest
-          imagePullPolicy: Never
+          image: raquel/pedido-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8083
+            - containerPort: 8081
           envFrom:
             - configMapRef:
                 name: app-config
-            - secretRef:
-                name: app-secret

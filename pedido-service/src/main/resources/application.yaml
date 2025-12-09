@@ -1,6 +1,7 @@
 server:
   port: 8081
 
-services:
-  cliente: http://localhost:8082
-  estoque: http://localhost:8080
+CLIENTE_SERVICE_HOST: localhost
+CLIENTE_SERVICE_PORT: 8082
+ESTOQUE_SERVICE_HOST: localhost
+ESTOQUE_SERVICE_PORT: 8083

@@ -1,9 +1,10 @@
 package com.example.cliente_service.repository;
 
+
 import com.example.cliente_service.model.Cliente;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
-@Repository
-public interface ClienteRepository extends ReactiveCrudRepository<Cliente, Long> {
+public interface ClienteRepository extends ReactiveCrudRepository<Cliente, String> {
+    Mono<Cliente> findById(String id);
 }

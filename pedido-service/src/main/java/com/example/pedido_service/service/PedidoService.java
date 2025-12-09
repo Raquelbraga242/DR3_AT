@@ -2,49 +2,43 @@ package com.example.pedido_service.service;
 
 import com.example.pedido_service.client.PedidoClient;
 import com.example.pedido_service.model.Pedido;
-import com.example.pedido_service.repository.PedidoRepository;
+import com.example.pedido_service.model.PedidoRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
-
 @Service
 public class PedidoService {
-
-    private final PedidoRepository repository;
     private final PedidoClient client;
+    public PedidoService(PedidoClient client){ this.client = client; }
 
-    public PedidoService(PedidoRepository repository, PedidoClient client) {
-        this.repository = repository;
-        this.client = client;
-    }
+    public Mono<Pedido> criarPedido(PedidoRequest req) {
 
-    public Mono<Pedido> criarPedido(Pedido pedido) {
-        return client.verificarProduto(pedido.getIdProduto())
-                .flatMap(qtdDisponivel -> {
-                    if (qtdDisponivel < pedido.getQuantidade()) {
-                        return Mono.error(new RuntimeException("Quantidade indisponível no estoque"));
-                    }
-                    return client.verificarCliente(pedido.getIdCliente())
-                            .flatMap(clienteOk -> {
-                                if (!clienteOk) {
-                                    return Mono.error(new RuntimeException("Cliente inválido"));
+        return client.clienteExiste(req.getClienteId())
+                .flatMap(clienteOk -> {
+                    if (!clienteOk) return Mono.error(new RuntimeException("Cliente não existe"));
+
+                    return client.consultarEstoque(req.getProduto())
+                            .flatMap(qtdDisponivel -> {
+                                if (qtdDisponivel < req.getQuantidade()) {
+                                    return Mono.error(new RuntimeException("Estoque insuficiente"));
                                 }
-                                // Adaptando chamada síncrona do repository para Mono
-                                return Mono.fromCallable(() -> repository.save(pedido));
+
+                                return client.reservarEstoque(req.getProduto(), req.getQuantidade())
+                                        .flatMap(reservou -> {
+                                            if (!reservou) return Mono.error(new RuntimeException("Falha ao reservar estoque"));
+
+                                            Pedido pedido = new Pedido();
+                                            pedido.setId(java.util.UUID.randomUUID().toString());
+                                            pedido.setClienteId(req.getClienteId());
+                                            pedido.setProduto(req.getProduto());
+                                            pedido.setQuantidade(req.getQuantidade());
+                                            pedido.setStatus("CRIADO");
+                                            pedido.setTimestamp(java.time.Instant.now());
+
+                                            return client.enviarPedidoParaCliente(req.getClienteId(), pedido)
+                                                    .thenReturn(pedido);
+                                        });
                             });
                 });
-    }
-
-    public Flux<Pedido> listarPedidos() {
-        // Adaptando chamada síncrona para Flux
-        return Flux.fromIterable(repository.findAll());
-    }
-
-    public Mono<Pedido> buscarPedido(Long id) {
-        return Mono.justOrEmpty(repository.findById(id));
-    }
-
-    public Mono<Void> deletarPedido(Long id) {
-        return Mono.fromRunnable(() -> repository.deleteById(id));
     }
 }

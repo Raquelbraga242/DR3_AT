@@ -1,7 +1,7 @@
 package com.example.cliente_service.controller;
 
-import com.example.cliente_service.client.EstoqueClient;
 import com.example.cliente_service.model.Cliente;
+import com.example.cliente_service.model.PedidoResumo;
 import com.example.cliente_service.service.ClienteService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -10,49 +10,20 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
-
-    private final ClienteService clienteService;
-    private final EstoqueClient estoqueClient;
-
-    public ClienteController(ClienteService clienteService, EstoqueClient estoqueClient) {
-        this.clienteService = clienteService;
-        this.estoqueClient = estoqueClient;
-    }
-
-    // =====================
-    // Endpoints CRUD Cliente
-    // =====================
+    private final ClienteService service;
+    public ClienteController(ClienteService service){ this.service = service; }
 
     @GetMapping
-    public Flux<Cliente> listarClientes() {
-        return clienteService.listar();
-    }
+    public Flux<Cliente> listar(){ return service.listar(); }
 
     @GetMapping("/{id}")
-    public Mono<Cliente> buscarCliente(@PathVariable Long id) {
-        return clienteService.buscar(id);
-    }
+    public Mono<Cliente> buscar(@PathVariable String id){ return service.buscar(id); }
 
     @PostMapping
-    public Mono<Cliente> criarCliente(@RequestBody Cliente cliente) {
-        return clienteService.salvar(cliente);
-    }
+    public Mono<Cliente> criar(@RequestBody Cliente cliente){ return service.salvar(cliente); }
 
-    @DeleteMapping("/{id}")
-    public Mono<Void> deletarCliente(@PathVariable Long id) {
-        return clienteService.deletar(id);
-    }
-
-    // =====================
-    // Endpoint de verificar produto no estoque
-    // =====================
-    @GetMapping("/{id}/verificar-produto/{idProduto}")
-    public Mono<String> verificarProduto(
-            @PathVariable Long id,
-            @PathVariable Long idProduto
-    ) {
-        return estoqueClient.consultarDisponibilidade(idProduto)
-                .map(qtd -> "Cliente " + id + " consultou o produto " + idProduto +
-                        " — Quantidade disponível: " + qtd);
+    @PostMapping("/{id}/adicionar-pedido")
+    public Mono<Void> adicionarPedido(@PathVariable String id, @RequestBody PedidoResumo resumo){
+        return service.adicionarPedidoAoCliente(id, resumo);
     }
 }

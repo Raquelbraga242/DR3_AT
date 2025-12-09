@@ -17,9 +17,4 @@ spec:
           image: estoque-service:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8082
-          envFrom:
-            - configMapRef:
-                name: app-config
-            - secretRef:
-                name: app-secret
+            - containerPort: 8083

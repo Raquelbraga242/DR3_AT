@@ -16,10 +16,6 @@ spec:
         - name: cliente-service
           image: cliente-service:latest
           imagePullPolicy: Never
+
           ports:
-            - containerPort: 8081
-          envFrom:
-            - configMapRef:
-                name: app-config
-            - secretRef:
-                name: app-secret
+            - containerPort: 8082
